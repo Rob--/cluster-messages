@@ -1,0 +1,30 @@
+{
+  "name": "cluster-messages",
+  "version": "1.0.0",
+  "description": "Easily send messages between workers and the master with callbacks.",
+  "main": "index.js",
+  "dependencies": {
+    "uuid4": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rob--/cluster-messages.git"
+  },
+  "keywords": [
+    "cluster",
+    "messaging",
+    "callback",
+    "events",
+    "workers"
+  ],
+  "author": "Rob--",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Rob--/cluster-messages/issues"
+  },
+  "homepage": "https://github.com/Rob--/cluster-messages#readme"
+}
