@@ -1,8 +1,6 @@
 const cluster = require('cluster')
 const uuid = require('uuid4')
 
-const Message = require('./message')
-
 function ClusterMessages(options){
     options = (options || {})
 
@@ -46,7 +44,7 @@ ClusterMessages.prototype.send = function(eventName, data, callback){
         /* This should not actually be needed, but to be 100% safe in case
          * messages between the master and worker processes are lost,
          * delete the callback function after a set timeout to prevent permanent memory hogging. */
-        setTimeout(function(){
+        setTimeout(() => {
             if(this.callbacks.hasOwnProperty(id)){
                 delete this.callbacks[id]
             }

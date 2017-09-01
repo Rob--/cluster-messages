@@ -48,14 +48,15 @@ messages.send('print', { name: 'John' }, response => {
 
 This function will emit an event, the callback is a single parameter
 that is passed, this means inside the event listener only one parameter
-can be passed to `sendResponse`.
+can be passed to `sendResponse` so it needs to be an object containing
+all the data.
 
 When sent from the master:
 - the event will get sent to all workers
 - each time the worker calls `sendResponse` (the callback inside
 the event listener), the `callback` will be invoked
-- e.g. if there are 3 workers, and all of them reply, the callback
-will be invoked 3 times
+- e.g. if there are 3 workers, and all of them call `sendResponse`,
+the callback will be invoked 3 times
 
 When sent from the worker:
 - the event is sent to the master only
@@ -99,7 +100,7 @@ received through `cluster.on('message')` or
 `process.on('message')` as expected, so the module adds a property containing
 meta data that is passed around with each event. As this meta data
 property is essentially exposed in every single `message` event emission
-within `cluster` or `process` the `metaKey` option allows you to define
+within `cluster` or `process`, the `metaKey` option allows you to define
 the name of the meta data property to ensure it does not conflict with
 your application.
 
