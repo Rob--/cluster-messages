@@ -4,7 +4,7 @@
   "description": "Easily send messages between workers and the master with callbacks.",
   "main": "index.js",
   "dependencies": {
-    "uuid4": "^1.0.0"
+    "uuid4": "^1.1.4"
   },
   "devDependencies": {},
   "scripts": {
