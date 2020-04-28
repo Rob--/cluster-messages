@@ -8,26 +8,26 @@ Events can be emitted by any process and received by any process.
 
 Require the package:
 ```javascript
-let ClusterMessages = require('cluster-messages')
-let messages = new ClusterMessages()
+let ClusterMessages = require('cluster-messages');
+let messages = new ClusterMessages();
 ```
 
 Setting up event listeners:
 ```javascript
 messages.on('multiplication', (data, sendResponse) => {
-    sendResponse(data.x * data.y)
-})
+  sendResponse(data.x * data.y);
+});
 ```
 
 Emitting events:
 ```javascript
 let data = {
-    x: Math.round(Math.random()  * 100),
-    y: Math.round(Math.random()  * 100)
-}
+  x: Math.round(Math.random() * 100),
+  y: Math.round(Math.random() * 100),
+};
 
 messages.send('multiplication', data, response => {
-    console.log(`${data.x} * ${data.y} = ${response}`)
+  console.log(`${data.x} * ${data.y} = ${response}`)
 })
 ```
 
@@ -41,9 +41,9 @@ messages.send('multiplication', data, response => {
 by the event listener, single parameter containing the response
 
 ```javascript
-messages.send('print', { name: 'John' }, response => {
-    console.log(response) // 'Hi John'
-})
+messages.send('print', { name: 'John' }, (response) => {
+  console.log(response); // 'Hi John'
+});
 ```
 
 This function will emit an event, the callback is a single parameter
@@ -72,8 +72,8 @@ to send back to the callback on the event emitter
 
 ```javascript
 messages.on('print', (data, sendResponse) => {
-    sendResponse('Hi ' + data.name)
-})
+  sendResponse('Hi ' + data.name);
+});
 ```
 
 This is the event listener, the callback takes two parameters (`data`
@@ -84,14 +84,14 @@ sent back to wherever the event originated.
 
 When initiating ClusterMessages you can pass it some options:
 ```javascript
-let ClusterMessages = require('cluster-messages')
+const ClusterMessages = require('cluster-messages');
 
-let options = {
+const options = {
   metaKey: '__metadata__',
-  callbackTimeout: 1000 * 60 * 10
-}
+  callbackTimeout: 1000 * 60 * 10,
+};
 
-let messages = new ClusterMessages(options)
+const messages = new ClusterMessages(options);
 ```
 
 #### metaKey
