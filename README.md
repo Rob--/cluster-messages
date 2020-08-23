@@ -65,7 +65,7 @@ When sent from the worker:
 
 - **eventName** (string) - the name of the event to listen for
 - **data** (object) - single object sent by the event emitter (`.send`)
-- **callback** (function) - takes two parameters, `data` (string) and
+- **callback** (function) - takes two parameters, `data` and
 `sendResponse` (function). `data` is the data sent by the event emitter,
 `sendResponse` is a function that you invoke and pass the data you want
 to send back to the callback on the event emitter
