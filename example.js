@@ -1,79 +1,115 @@
-const os = require('os');
-const cluster = require('cluster');
-const ClusterMessages = require('./index');
+import os from 'node:os';
+import cluster from 'node:cluster';
+import chalk from 'chalk';
 
-const messages = new ClusterMessages();
+import ClusterMessages from './src/cluster-messages.js';
+
+const healthMonitor = new ClusterMessages('health');
+const workDispatcher = new ClusterMessages('work');
 
 if (cluster.isMaster) {
-  console.log(`Master ${process.pid} is running`);
+  console.log(`Primary is running. PID: ${process.pid}`);
 
-  // eslint-disable-next-line
-  for(let i = 0; i < os.cpus().length; i++){
-    cluster.fork();
-  }
+  os.cpus().slice(0, 2).forEach(() => cluster.fork());
 
-  messages.on('addTwoNumbers', (data, callback) => {
-    callback(data.x + data.y);
-  });
-
-  /* Timeout to wait for workers to fork.
-  * This event is emitted from the master to all the workers. */
-  setTimeout(() => {
-    messages.send('getWorkerPID', (response) => {
-      console.log(`Worker with ID #${response.id} has PID of ${response.pid}`);
+  setInterval(() => {
+    healthMonitor.send('ping', (response) => {
+      const { worker, health } = response;
+      console.log(`Worker #${chalk.blue(worker)} health status:`, health);
     });
-  }, 3000);
+  }, 5000);
+
+  setTimeout(() => {
+    workDispatcher.send('work1', { id: 123, duration: 500 }, (response) => {
+      const {worker, id } = response;
+      console.log(`Worker #${chalk.blue(worker)} finished job #${id}.`);
+    });
+
+    workDispatcher.send('work2', { id: 456 });
+
+    workDispatcher.send('work3', { id: 456 });
+  }, 2500);
+
 } else {
-  console.log(`Worker ${cluster.worker.process.pid} started`);
+  console.log(`Worker ${cluster.worker.id} started`);
 
-  const input = {
-    x: Math.round(Math.random() * 100),
-    y: Math.round(Math.random() * 100),
-  };
-
-  /* Timeout is to wait for all the workers to spawn. */
-  setTimeout(() => {
-    messages.send('addTwoNumbers', input, (response) => {
-      console.log(`${input.x} + ${input.y} = ${response}`);
-    });
-  }, 3000);
-
-  messages.on('getWorkerPID', (data, sendResponse) => {
+  healthMonitor.on('ping', (_, sendResponse) => {
     sendResponse({
-      id: cluster.worker.id,
-      pid: cluster.worker.process.pid,
-    });
+      worker: cluster.worker.id,
+      health: Math.random() < 0.8 ? 'good' : 'bad',
+    })
   });
+
+  workDispatcher.on('work1', ({ id, duration }, sendResponse) => {
+    setTimeout(() => sendResponse({
+      worker: cluster.worker.id,
+      id
+    }), duration);
+  });
+
+  workDispatcher.on('work2', ({ id }) => console.log(`Worker #${chalk.blue(cluster.worker.id)} received job #${id}`));
+
+  workDispatcher.on('work3', () => console.log(`Worker #${chalk.blue(cluster.worker.id)} received a job`));
 }
 
 /**
- OUTPUT:
+ * Output:
 
- user@NAME ~/dir/cluster-messages (master)
- $ node example.js
- Master 11844 is running
- Worker 5320 started
- Worker 13044 started
- Worker 16480 started
- Worker 15840 started
- Worker 8080 started
- Worker 14792 started
- Worker 6744 started
- Worker 2376 started
- Worker with ID #1 has PID of 5320
- Worker with ID #2 has PID of 13044
- Worker with ID #3 has PID of 15840
- Worker with ID #6 has PID of 2376
- Worker with ID #4 has PID of 8080
- Worker with ID #7 has PID of 6744
- Worker with ID #5 has PID of 16480
- Worker with ID #8 has PID of 14792
- 32 + 4 = 36
- 12 + 56 = 68
- 45 + 62 = 107
- 29 + 17 = 46
- 9 + 26 = 35
- 36 + 80 = 116
- 40 + 63 = 103
- 65 + 49 = 114
+➜  cluster-messages git:(master) ✗ node example.js
+Primary is running. PID: 5334
+Worker 1 started
+Worker 2 started
+[1] Received message: work1 @ c2304197
+[2] Received message: work1 @ c2304197
+[master] Sending message: work1 @ c2304197
+[master] Sending message: work2 @ 393568ce
+[1] Received message: work1 @ c2304197
+[2] Received message: work1 @ c2304197
+[1] Processing message: work1 @ c2304197
+[master] Sending message: work3 @ 38bf766d
+[2] Processing message: work1 @ c2304197
+[1] Received message: work2 @ 393568ce
+[2] Received message: work2 @ 393568ce
+[1] Received message: work2 @ 393568ce
+[2] Received message: work2 @ 393568ce
+[1] Processing message: work2 @ 393568ce
+[2] Processing message: work2 @ 393568ce
+Worker #1 received job #456
+Worker #2 received job #456
+[1] Received message: work3 @ 38bf766d
+[2] Received message: work3 @ 38bf766d
+[1] Received message: work3 @ 38bf766d
+[2] Received message: work3 @ 38bf766d
+[1] Processing message: work3 @ 38bf766d
+[2] Processing message: work3 @ 38bf766d
+Worker #1 received a job
+Worker #2 received a job
+[2] Sending response: { worker: 2, id: 123 }
+[1] Sending response: { worker: 1, id: 123 }
+[master] Received message: work1 @ 83833be6
+[master] Received message: work1 @ 83833be6
+[master] Processing message: work1 @ 83833be6
+Worker #2 finished job #123.
+[master] Received message: work1 @ 719d057a
+[master] Received message: work1 @ 719d057a
+[master] Processing message: work1 @ 719d057a
+Worker #1 finished job #123.
+[master] Sending message: ping @ 94485156
+[1] Received message: ping @ 94485156
+[2] Received message: ping @ 94485156
+[1] Processing message: ping @ 94485156
+[2] Processing message: ping @ 94485156
+[1] Sending response: { worker: 1, health: 'bad' }
+[2] Sending response: { worker: 2, health: 'good' }
+[1] Received message: ping @ 94485156
+[2] Received message: ping @ 94485156
+[master] Received message: ping @ cabaa9ae
+[master] Processing message: ping @ cabaa9ae
+Worker #1 health status: bad
+[master] Received message: ping @ cabaa9ae
+[master] Received message: ping @ 3068b86e
+[master] Processing message: ping @ 3068b86e
+Worker #2 health status: good
+[master] Received message: ping @ 3068b86e
+
  */
