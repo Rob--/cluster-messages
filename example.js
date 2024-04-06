@@ -21,13 +21,13 @@ if (cluster.isMaster) {
 
   setTimeout(() => {
     workDispatcher.send('work1', { id: 123, duration: 500 }, (response) => {
-      const {worker, id } = response;
+      const { worker, id } = response;
       console.log(`Worker #${chalk.blue(worker)} finished job #${id}.`);
     });
 
     workDispatcher.send('work2', { id: 456 });
 
-    workDispatcher.send('work3', { id: 456 });
+    workDispatcher.send('work3');
   }, 2500);
 
 } else {

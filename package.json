@@ -14,11 +14,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
-		"src"
-	],
+    "src"
+  ],
   "imports": {
-		"#utils": "./src/utils.js"
-	},
+    "#utils": "./src/utils.js"
+  },
   "keywords": [
     "cluster",
     "messaging",

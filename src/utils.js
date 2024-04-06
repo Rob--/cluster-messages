@@ -5,7 +5,7 @@ import chalk from 'chalk';
 
 export const defaultOptions = {
     log: {
-        level: 'debug',
+        level: 'off',
         type: 'hash'
     },
     metadataKey: '__metadata__',

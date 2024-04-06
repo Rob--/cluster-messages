@@ -10,6 +10,14 @@ TODO:
 3. Implement emitOnce (where callback is garbage collected after all workers respond)
 4. Update README
 5. Add tests
+6. Implement await/async
+7. Add linter
+8. Convert to TypeScript
+9. Transpile with Babel
+10. Deep merge default options
+11. Support modular architecture to move messages off IPC wire
+  * Support HTTP, web sockets, shared memory?
+12. Introduce load testing benchmarks
 
 # Usage
 
@@ -82,16 +90,18 @@ When initiating ClusterMessages you can pass it some options:
 ```javascript
 const ClusterMessages = require('cluster-messages');
 
+const instanceName = 'healthMonitor';
 const options = {
   metadataKey: '__metadata__',
-  callbackTimeout: 1000 * 60 * 10,
+  log: {
+    level: 'warn',
+    type: 'hash'
+  }
 };
 
-const messages = new ClusterMessages(options);
+const messages = new ClusterMessages(instanceName, options);
 ```
 
 #### metadataKey
-Messages are sent around as usual and can be received through `cluster.on('message')` or `process.on('message')` as expected, so the module adds a property containing metadata that is passed around with each event. As this metadata property is essentially exposed in every single `message` event emission within `cluster` or `process`, the `metaKey` option allows you to define the name of the meta data property to ensure it does not conflict with your application.
+Messages are sent around as usual and can be received through `cluster.on('message')` or `process.on('message')` as expected, so the module adds a property containing metadata that is passed around with each event. As this metadata property is essentially exposed in every single `message` event emission within `cluster` or `process`, the `metadataKey` option allows you to define the name of the meta data property to ensure it does not conflict with your application.
 
-#### callbackTimeout
-When a callback is passed to `messages.send`, it is stored, but in the case that for some reason due to either Node or the OS that the message is dropped when being sent from one process to the other, the callback will never get deleted so the callback is automatically deleted after a set amount of time (default is 10 minutes). This option allows you to specify a timeout in milliseconds. This option is not really necessary at all, but the point of this logic is to prevent memory leaks.
