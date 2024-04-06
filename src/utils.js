@@ -24,14 +24,18 @@ export const serialiseMessage = (message, options) => {
     return `${chalk.blue(eventName)} @ ${serialised}`;
 };
 
-export const debug = (options, ...args) => {
+export const debug = (options, argsGenerator) => {
+    const args = argsGenerator();
+
     args.unshift(cluster.isMaster ? chalk.green('[master]') : chalk.red(`[${cluster.worker.id}]`));
     if (options.log && ['debug'].includes(options.log.level)) {
         console.log.apply(this, args);
     }
 };
 
-export const warn = (options, ...args) => {
+export const warn = (options, argsGenerator) => {
+    const args = argsGenerator();
+
     args.unshift(cluster.isMaster ? chalk.green('[master]') : chalk.red(`[${cluster.worker.id}]`));
     if (options.log && ['debug', 'warn'].includes(options.log.level)) {
         console.log.apply(this, args);

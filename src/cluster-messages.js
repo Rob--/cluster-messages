@@ -72,7 +72,7 @@ class ClusterMessages {
       message[this.options.metadataKey].callbackId = callbackId;
     }
 
-    // debug(this.options, 'Sending message:', serialiseMessage(message, this.options));
+    // debug(this.options, () => ['Sending message:', serialiseMessage(message, this.options)]);
 
     if (cluster.isMaster || cluster.isPrimary) {
       Object.entries(cluster.workers).forEach(([workerId, worker]) => worker.send(message));
@@ -101,7 +101,7 @@ class ClusterMessages {
    * @returns
    */
   handleMessage(message, worker) {
-    // debug(this.options, 'Received message:', serialiseMessage(message, this.options));
+    // debug(this.options, () => ['Received message:', serialiseMessage(message, this.options)]);
 
     // Ignore any messages that didn't originate from this module.
     if (!has.call(message, this.options.metadataKey)) {
@@ -113,7 +113,7 @@ class ClusterMessages {
       return;
     }
 
-    // debug(this.options, 'Processing message:', serialiseMessage(message, this.options));
+    // debug(this.options, () => ['Processing message:', serialiseMessage(message, this.options)]);
 
     if (has.call(message[this.options.metadataKey], 'response')) {
       // If this is a response, we trigger the callback in the initial emit call
@@ -132,7 +132,7 @@ class ClusterMessages {
    */
   generateSendResponse(requestMessage) {
     return (response) => {
-      // debug(this.options, 'Sending response:', response);
+      // debug(this.options, () => ['Sending response:', response]);
 
       // If there is no callback, don't do anything.
       if (!has.call(requestMessage[this.options.metadataKey], 'callbackId')) {
@@ -178,11 +178,10 @@ class ClusterMessages {
     const { eventName } = message[this.options.metadataKey];
 
     if (!has.call(this.listeners, eventName)) {
-      warn(
-        this.options,
+      warn(this.options, () => [
         chalk.yellow('cluster-messages received event with no registered listener:'),
         serialiseMessage(message, this.options)
-      );
+      ]);
       return;
     }
 

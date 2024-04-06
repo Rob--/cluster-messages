@@ -4,7 +4,12 @@ import chalk from 'chalk';
 
 import ClusterMessages from './src/cluster-messages.js';
 
-const healthMonitor = new ClusterMessages('health');
+const healthMonitor = new ClusterMessages('health', {
+  log: {
+    level: 'debug',
+    type: 'hash'
+  }
+});
 const workDispatcher = new ClusterMessages('work');
 
 if (cluster.isMaster) {
